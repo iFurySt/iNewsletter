@@ -19,7 +19,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Read RSS links and emails from Issues
+      - name: Read data from Issues
         id: read_issues
         uses: actions/github-script@v7
         with:

@@ -7,8 +7,6 @@ module.exports =async ({github, context}) => {
         state: 'open',
     });
 
-    console.log(issues);
-
     const validIssues = issues.map(issue => {
         try {
             const body = issue.body;
@@ -31,21 +29,48 @@ module.exports =async ({github, context}) => {
     let parser = new Parser();
 
     for (const issue of validIssues) {
+        const { data: comments } = await github.rest.issues.listCommentsForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue.number,
+        });
+
+        const published = {}
+        comments.forEach(item => {
+            const matches = item.body.match(/- \[(.*)\]\((.*)\)/g);
+            if (!matches) return;
+            matches.forEach(match => {
+                const titleMatch = match.match(/- \[(.*)\]\((.*)\)/);
+                if (titleMatch && titleMatch.length === 3) {
+                    published[titleMatch[2]] = titleMatch[1];
+                }
+            });
+        })
+
         let markdownString = '';
         try {
             let feed = await parser.parseURL(issue.url);
             feed.items.forEach(item => {
-                console.log(item.title + ':' + item.link + item.pubDate);
-                markdownString += `- [${item.title}](${item.link}) - ${item.pubDate}\n`;
+                if (published[item.link]) {
+                    console.log('Already published: ' + item.title + ':' + item.link + item.pubDate);
+                    return;
+                }
+                markdownString += `- [${item.title}](${item.link}) - ${item.pubDate}\n\`\`\`\n${item.contentSnippet}\n\`\`\`\n\n`;
             });
         } catch (error) {
             console.error(`Failed to process issue ${issue.number}: ${error.message}`);
         }
+
+        if (markdownString === '') {
+            console.error(`No new items found for issue ${issue.number}`);
+            return
+        }
+
         await github.rest.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
             issue_number: issue.number,
-            body: `Validated source: ${issue.label} - ${issue.url} - ${issue.email}\n\n${markdownString}`,
+            body: markdownString,
         });
     }
 }
