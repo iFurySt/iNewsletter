@@ -1,0 +1,24 @@
+name: Source
+description: Create a new issue to add a new source to the newsletter.
+title: 'Add a new source to the newsletter'
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Source Type
+      description: Please choose the source type.
+      options:
+        - rss
+        - json
+        - custom
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: Source Url
+      description: "Please provide the URL of the source you'd like to add."
+      placeholder: "Such as: https://example.com/rss.xml"
+    validations:
+      required: true
