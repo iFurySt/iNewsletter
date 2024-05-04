@@ -1,6 +1,6 @@
 name: Source
 description: Create a new issue to add a new source to the newsletter.
-title: 'Add a new source to the newsletter'
+title: 'Please input the source URL here!!!'
 body:
   - type: dropdown
     id: type
