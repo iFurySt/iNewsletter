@@ -11,20 +11,18 @@ module.exports =async ({github, context}) => {
         try {
             const body = issue.body;
             const labelMatch = body.match(/### Source Type\n\n(.*)\n/);
-            const urlMatch = body.match(/### Source Url\n\n(.*)\n/);
-            const emailMatch = body.match(/### Email\n\n(.*)(\n)?/);
+            const urlMatch = body.match(/### Source Url\n\n(.*)(\n)?/);
 
             return {
                 label: labelMatch ? labelMatch[1] : null,
                 url: urlMatch ? urlMatch[1] : null,
-                email: emailMatch ? emailMatch[1] : null,
                 number: issue.number,
             };
         } catch (error) {
             console.error(`Failed to process issue ${issue.number}: ${error.message}`);
             return null;
         }
-    }).filter(info => info !== null && info.label !== null && info.url !== null && info.email !== null);
+    }).filter(info => info !== null && info.label !== null && info.url !== null);
 
     let parser = new Parser();
 
